@@ -207,6 +207,19 @@ export function YearbookExperience() {
     [query, selectedRole],
   );
 
+  const [rosterExpanded, setRosterExpanded] = useState(false);
+  const [nomineeQuery, setNomineeQuery] = useState("");
+
+  const filteredNominees = useMemo(
+    () =>
+      staff.filter((member) =>
+        `${member.name} ${member.handle} ${member.role}`
+          .toLowerCase()
+          .includes(nomineeQuery.toLowerCase()),
+      ),
+    [nomineeQuery],
+  );
+
   function showNotice(message: string) {
     setNotice(message);
     window.setTimeout(() => setNotice(null), 2800);
@@ -223,6 +236,12 @@ export function YearbookExperience() {
 
   function nextCategory() {
     setActiveCategory((current) => (current + 1) % categories.length);
+    setSelectedStaff(null);
+    setBallotSubmitted(false);
+  }
+
+  function prevCategory() {
+    setActiveCategory((current) => (current - 1 + categories.length) % categories.length);
     setSelectedStaff(null);
     setBallotSubmitted(false);
   }
@@ -264,7 +283,7 @@ export function YearbookExperience() {
       <header className="topbar">
         <BrandMark />
         <nav className="desktop-nav" aria-label="Primary navigation">
-          {["Home", "Staff", "Vote", "Suggestions", "Results"].map((item) => (
+          {["Home", "Vote", "Staff", "Suggestions", "Results"].map((item) => (
             <a key={item} href={`#${item.toLowerCase()}`}>
               {item}
             </a>
@@ -299,7 +318,7 @@ export function YearbookExperience() {
               </button>
             </div>
             <nav aria-label="Mobile navigation">
-              {["Home", "Staff", "Vote", "Suggestions", "Results"].map((item, index) => (
+              {["Home", "Vote", "Staff", "Suggestions", "Results"].map((item, index) => (
                 <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setMenuOpen(false)}>
                   <span>0{index + 1}</span>
                   {item}
@@ -331,7 +350,7 @@ export function YearbookExperience() {
                 Cast your votes <ArrowRight size={17} />
               </a>
               <a className="text-link" href="#staff">
-                Meet the staff <ChevronRight size={16} />
+                View staff directory <ChevronRight size={16} />
               </a>
             </div>
           </motion.div>
@@ -355,87 +374,68 @@ export function YearbookExperience() {
           <div className="hero-index" aria-hidden="true">
             <span>VRP</span><strong>YB</strong><span>26</span>
           </div>
-          <a className="scroll-cue" href="#staff">Scroll to explore <span>↓</span></a>
+          <a className="scroll-cue" href="#vote">Scroll to vote <span>↓</span></a>
         </section>
 
-        <section className="staff-section section" id="staff">
-          <div className="section-heading">
-            <div>
-              <span className="section-number">01 / The roster</span>
-              <h2>Meet the staff</h2>
-            </div>
-            <p>Every city has a pulse. These are the people who keep ours moving.</p>
-          </div>
-          <div className="staff-toolbar">
-            <div className="staff-filter-tabs" role="tablist" aria-label="Filter staff by rank">
-              {roleOptions.map((role) => {
-                const count =
-                  role === "All"
-                    ? staff.length
-                    : staff.filter((m) => m.role === role).length;
-                return (
-                  <button
-                    key={role}
-                    role="tab"
-                    aria-selected={selectedRole === role}
-                    className={`filter-tab ${selectedRole === role ? "active" : ""}`}
-                    onClick={() => setSelectedRole(role)}
-                  >
-                    {role} ({count})
-                  </button>
-                );
-              })}
-            </div>
-            <label className="search-box">
-              <Search size={16} />
-              <span className="sr-only">Search staff</span>
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search staff or role..."
-              />
-            </label>
-          </div>
-
-          <div className="staff-grid-compact">
-            {filteredStaff.map((member, index) => (
-              <MagicStaffCard
-                key={member.name}
-                member={member}
-                index={index}
-                onSelect={(name) => {
-                  setSelectedStaff(name);
-                  showNotice(`Selected ${name} for category voting!`);
-                }}
-              />
-            ))}
-          </div>
-          <div className="portrait-note">
-            <Sparkles size={16} />
-            Character portraits will be delivered from FiveManage.
-          </div>
-        </section>
-
+        {/* SECTION 01: THE BALLOT (PRIMARY FOCUS) */}
         <section className="vote-section section" id="vote">
           <div className="vote-intro">
-            <span className="section-number">02 / The ballot</span>
+            <span className="section-number">01 / The ballot</span>
             <h2>Your call.<br /><em>Their legacy.</em></h2>
             <p>Pick the staff member who fits the category best. Your ballot stays private.</p>
+            
             <div className="category-progress">
               <span>Category {activeCategory + 1} of {categories.length}</span>
               <div><i style={{ width: `${((activeCategory + 1) / categories.length) * 100}%` }} /></div>
             </div>
+
+            {/* Quick Category Selector Pills */}
+            <div className="category-nav-pills" role="tablist" aria-label="Category selector">
+              {categories.map((cat, idx) => (
+                <button
+                  key={idx}
+                  className={`category-pill ${activeCategory === idx ? "active" : ""}`}
+                  onClick={() => {
+                    setActiveCategory(idx);
+                    setSelectedStaff(null);
+                    setBallotSubmitted(false);
+                  }}
+                >
+                  #{idx + 1}
+                </button>
+              ))}
+            </div>
           </div>
+
           <div className="ballot-card">
             <div className="ballot-card-top">
               <div>
-                <span>Most likely to...</span>
+                <span>Category {activeCategory + 1} of {categories.length} · Most likely to...</span>
                 <h3>{categories[activeCategory]}</h3>
               </div>
               <Vote size={28} />
             </div>
+
+            {/* Nominee Filter Box */}
+            <div className="ballot-nominee-search">
+              <Search size={15} style={{ color: "#8b8379" }} />
+              <input
+                value={nomineeQuery}
+                onChange={(e) => setNomineeQuery(e.target.value)}
+                placeholder="Filter nominees by name or role..."
+              />
+              {nomineeQuery && (
+                <button
+                  style={{ border: 0, background: "none", cursor: "pointer", color: "#8b8379" }}
+                  onClick={() => setNomineeQuery("")}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
             <div className="nominee-list" role="radiogroup" aria-label={categories[activeCategory]}>
-              {staff.map((member) => (
+              {filteredNominees.map((member) => (
                 <button
                   key={member.name}
                   role="radio"
@@ -452,13 +452,118 @@ export function YearbookExperience() {
                 </button>
               ))}
             </div>
+
             <div className="ballot-actions">
               <button className="primary-button" onClick={submitBallot}>
                 {ballotSubmitted ? "Vote recorded" : "Submit vote"}
                 {ballotSubmitted ? <Check size={17} /> : <ArrowRight size={17} />}
               </button>
-              <button className="next-button" onClick={nextCategory}>Next category</button>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <button className="next-button" onClick={prevCategory}>&larr; Prev</button>
+                <button className="next-button" onClick={nextCategory}>Next category &rarr;</button>
+              </div>
             </div>
+          </div>
+        </section>
+
+        {/* SECTION 02: COMPACT MARQUEE STAFF ROSTER */}
+        <section className="staff-section section" id="staff">
+          <div className="section-heading">
+            <div>
+              <span className="section-number">02 / The roster</span>
+              <h2>Meet the staff</h2>
+            </div>
+            <p>Every city has a pulse. Click any staff member to select them for voting.</p>
+          </div>
+
+          {/* Magic UI Infinite Marquee Track */}
+          <div className="marquee-container">
+            <div className="marquee-track">
+              {[...staff, ...staff].map((member, idx) => (
+                <button
+                  key={`${member.name}-${idx}`}
+                  className="marquee-pill"
+                  onClick={() => {
+                    setSelectedStaff(member.name);
+                    showNotice(`Selected ${member.name} for voting!`);
+                  }}
+                >
+                  <span className={`nominee-avatar portrait-${member.tone}`} style={{ width: 24, height: 24, fontSize: 8 }}>
+                    {member.initials}
+                  </span>
+                  <span>{member.name}</span>
+                  <small>· {member.role}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="roster-toggle-bar">
+            <button
+              className="toggle-roster-button"
+              onClick={() => setRosterExpanded(!rosterExpanded)}
+            >
+              {rosterExpanded ? "Collapse Directory" : `Expand Full Directory (${staff.length})`}
+            </button>
+          </div>
+
+          {rosterExpanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{ marginTop: 24 }}
+            >
+              <div className="staff-toolbar">
+                <div className="staff-filter-tabs" role="tablist" aria-label="Filter staff by rank">
+                  {roleOptions.map((role) => {
+                    const count =
+                      role === "All"
+                        ? staff.length
+                        : staff.filter((m) => m.role === role).length;
+                    return (
+                      <button
+                        key={role}
+                        role="tab"
+                        aria-selected={selectedRole === role}
+                        className={`filter-tab ${selectedRole === role ? "active" : ""}`}
+                        onClick={() => setSelectedRole(role)}
+                      >
+                        {role} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+                <label className="search-box">
+                  <Search size={16} />
+                  <span className="sr-only">Search staff</span>
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search staff or role..."
+                  />
+                </label>
+              </div>
+
+              <div className="staff-grid-compact">
+                {filteredStaff.map((member, index) => (
+                  <MagicStaffCard
+                    key={member.name}
+                    member={member}
+                    index={index}
+                    onSelect={(name) => {
+                      setSelectedStaff(name);
+                      showNotice(`Selected ${name} for category voting!`);
+                    }}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          <div className="portrait-note">
+            <Sparkles size={16} />
+            Character portraits delivered from FiveManage.
           </div>
         </section>
 

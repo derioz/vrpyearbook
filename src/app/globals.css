@@ -596,3 +596,149 @@ footer p, footer > span { color: #67625c; font-size: 9px; letter-spacing: .1em; 
   transform: translateX(0);
 }
 
+/* Magic UI Marquee Roster & Expandable Directory */
+.marquee-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 16px 0;
+  margin-bottom: 24px;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation: marquee-scroll 45s linear infinite;
+}
+
+.marquee-container:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(20, 18, 16, 0.9);
+  backdrop-filter: blur(10px);
+  color: var(--paper);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.marquee-pill:hover {
+  border-color: var(--orange);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 122, 0, 0.25);
+}
+
+.marquee-pill small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.roster-toggle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.toggle-roster-button {
+  padding: 10px 22px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--paper);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.toggle-roster-button:hover {
+  border-color: var(--orange);
+  background: rgba(255, 122, 0, 0.1);
+  color: #fff;
+}
+
+/* Ballot Nominee Search & Navigation */
+.ballot-nominee-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin: 14px 28px 4px;
+  border-bottom: 1px solid #ded7ce;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.ballot-nominee-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #201d19;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ballot-nominee-search input::placeholder {
+  color: #8b8379;
+}
+
+.category-nav-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+
+.category-pill {
+  padding: 5px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: transparent;
+  color: #585147;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.category-pill:hover {
+  border-color: #201d19;
+  color: #201d19;
+}
+
+.category-pill.active {
+  background: #201d19;
+  color: #fff;
+  border-color: #201d19;
+}
+
+
