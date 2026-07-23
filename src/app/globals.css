@@ -234,26 +234,143 @@ a { color: inherit; text-decoration: none; }
 .ballot-card-top span { color: #837b71; font-size: 9px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
 .ballot-card-top h3 { max-width: 600px; margin: 8px 0 0; font-size: clamp(28px,3.4vw,52px); line-height: 1; letter-spacing: -.055em; }
 .ballot-card-top > svg { color: var(--orange); }
-.nominee-list { display: grid; padding: 10px 28px; max-height: 440px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--orange) #e5dfd5; }
+.nominee-list { display: flex; flex-direction: column; padding: 12px 24px; max-height: 480px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--orange) #e5dfd5; gap: 4px; }
 .nominee-list button {
-  display: grid; grid-template-columns: 48px 1fr 24px; align-items: center; gap: 14px;
-  padding: 13px 0; border: 0; border-bottom: 1px solid #ded7ce;
-  background: transparent; text-align: left; cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px; border: 1px solid transparent; border-bottom: 1px solid #ded7ce;
+  border-radius: 8px; background: transparent; text-align: left; cursor: pointer;
+  width: 100%; box-sizing: border-box; transition: all 0.18s ease;
 }
-.nominee-list button:last-child { border-bottom: 0; }
+.nominee-list button:hover { background: rgba(0, 0, 0, 0.03); }
+.nominee-list button.selected { background: rgba(255, 122, 0, 0.06); border-color: rgba(255, 122, 0, 0.3); }
 .nominee-avatar {
   width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid #b8afa4;
   color: #fff; background: linear-gradient(135deg,var(--portrait-a),var(--portrait-b));
-  font-size: 10px; font-weight: 850;
+  font-size: 10px; font-weight: 850; flex-shrink: 0; border-radius: 6px;
 }
-.nominee-list button > span:nth-child(2) { display: grid; gap: 3px; }
-.nominee-list strong { color: #201d19; font-size: 13px; }
-.nominee-list small { color: #8b8379; font-size: 9px; letter-spacing: .05em; }
-.nominee-list button > i {
-  width: 20px; height: 20px; display: grid; place-items: center; border: 1px solid #bfb5aa;
-  border-radius: 50%; color: white; font-style: normal;
+.nominee-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.nominee-info strong { color: #201d19; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nominee-info small { color: #8b8379; font-size: 9px; letter-spacing: .05em; text-transform: uppercase; }
+
+.voted-badge {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800;
+  letter-spacing: 0.05em; padding: 5px 12px; border-radius: 9999px;
+  background: rgba(52, 211, 153, 0.18); color: #047857; border: 1px solid rgba(52, 211, 153, 0.4);
+  white-space: nowrap; flex-shrink: 0; margin-left: auto;
 }
-.nominee-list button.selected > i { border-color: var(--orange); background: var(--orange); }
+
+/* Category Sidebar Scroll Layout */
+.vote-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .vote-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.category-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 90px;
+}
+
+.sidebar-list-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted, #8b8379);
+  margin-bottom: 10px;
+}
+
+.category-scroll-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--orange) rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-category-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  color: #a8a095;
+  text-align: left;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.sidebar-category-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-category-item.active {
+  background: rgba(255, 122, 0, 0.12);
+  border-color: var(--orange, #ff7a00);
+  color: #fff;
+}
+
+.sidebar-category-item.voted {
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.cat-num {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--orange, #ff7a00);
+  flex-shrink: 0;
+}
+
+.cat-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.cat-voted-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.2);
+  color: #34d399;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.cat-arrow {
+  font-size: 12px;
+  color: #666;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.sidebar-category-item:hover .cat-arrow,
+.sidebar-category-item.active .cat-arrow {
+  opacity: 1;
+}
+
 .ballot-actions { display: flex; align-items: center; gap: 24px; padding: 22px 28px 28px; }
 .ballot-actions .primary-button { min-width: 180px; }
 .next-button { border: 0; background: transparent; color: #6d665d; cursor: pointer; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
