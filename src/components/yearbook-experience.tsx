@@ -22,10 +22,49 @@ import { AnimatePresence, motion } from "motion/react";
 import { FormEvent, useMemo, useState } from "react";
 
 const staff = [
-  { name: "Riley Knox", handle: "RileyK", role: "Senior Administrator", initials: "RK", tone: "amber" },
-  { name: "Marcus Vale", handle: "MValentine", role: "Lead Moderator", initials: "MV", tone: "copper" },
-  { name: "Elena Cruz", handle: "ElenaC", role: "Community Manager", initials: "EC", tone: "crimson" },
-  { name: "Noah Mercer", handle: "NMercer", role: "Administrator", initials: "NM", tone: "gold" },
+  // Owner
+  { name: "Grumpy", handle: "Grumpy", role: "Owner", initials: "GR", tone: "gold" },
+  { name: "Nez", handle: "Nez", role: "Owner", initials: "NZ", tone: "gold" },
+  { name: "Soup", handle: "Soup", role: "Owner", initials: "SP", tone: "gold" },
+
+  // Senior Admin
+  { name: "Rue", handle: "Rue", role: "Senior Admin", initials: "RU", tone: "amber" },
+  { name: "Damon", handle: "Damon", role: "Senior Admin", initials: "DM", tone: "amber" },
+
+  // Admin
+  { name: "Peaches", handle: "Peaches", role: "Admin", initials: "PC", tone: "crimson" },
+  { name: "Artemis", handle: "Artemis", role: "Admin", initials: "AR", tone: "crimson" },
+  { name: "El Churro", handle: "ElChurro", role: "Admin", initials: "EC", tone: "crimson" },
+  { name: "Booberry", handle: "Booberry", role: "Admin", initials: "BB", tone: "crimson" },
+  { name: "Ivysaur", handle: "Ivysaur", role: "Admin", initials: "IV", tone: "crimson" },
+  { name: "MrCarlile", handle: "MrCarlile", role: "Admin", initials: "MC", tone: "crimson" },
+
+  // Senior Mod
+  { name: "Knoxberry", handle: "Knoxberry", role: "Senior Mod", initials: "KB", tone: "copper" },
+  { name: "Jonsey", handle: "Jonsey", role: "Senior Mod", initials: "JS", tone: "copper" },
+  { name: "Copia", handle: "Copia", role: "Senior Mod", initials: "CP", tone: "copper" },
+  { name: "Stimpy", handle: "Stimpy", role: "Senior Mod", initials: "ST", tone: "copper" },
+  { name: "Dougie", handle: "Dougie", role: "Senior Mod", initials: "DG", tone: "copper" },
+
+  // Mod (Jimmy Dale EXCLUDED)
+  { name: "Skittlez", handle: "Skittlez", role: "Mod", initials: "SK", tone: "amber" },
+  { name: "B1gChungus", handle: "B1gChungus", role: "Mod", initials: "BC", tone: "copper" },
+  { name: "Decker", handle: "Decker", role: "Mod", initials: "DK", tone: "crimson" },
+  { name: "DanoFett", handle: "DanoFett", role: "Mod", initials: "DF", tone: "gold" },
+  { name: "ROADKILL", handle: "ROADKILL", role: "Mod", initials: "RK", tone: "amber" },
+  { name: "LethalDocTTV", handle: "LethalDocTTV", role: "Mod", initials: "LD", tone: "copper" },
+  { name: "Ren Höek", handle: "RenHoek", role: "Mod", initials: "RH", tone: "crimson" },
+  { name: "clementine", handle: "clementine", role: "Mod", initials: "CL", tone: "gold" },
+  { name: "Frank Fletcher", handle: "FrankFletcher", role: "Mod", initials: "FF", tone: "amber" },
+
+  // Support
+  { name: "Chevy", handle: "Chevy", role: "Support", initials: "CH", tone: "gold" },
+  { name: "Tropic", handle: "Tropic", role: "Support", initials: "TR", tone: "copper" },
+  { name: "Cherry", handle: "Cherry", role: "Support", initials: "CY", tone: "crimson" },
+  { name: "Bells", handle: "Bells", role: "Support", initials: "BL", tone: "amber" },
+  { name: "NauurrCleourrr", handle: "NauurrCleourrr", role: "Support", initials: "NC", tone: "gold" },
+  { name: "Beaumont", handle: "Beaumont", role: "Support", initials: "BM", tone: "copper" },
+  { name: "elaa", handle: "elaa", role: "Support", initials: "EL", tone: "crimson" },
 ];
 
 const categories = [
