@@ -96,6 +96,73 @@ const initialSuggestions = [
   { id: 3, title: "Most likely to become a local legend", author: "Anonymous", votes: 28 },
 ];
 
+const roleOptions = ["All", "Owner", "Senior Admin", "Admin", "Senior Mod", "Mod", "Support"];
+
+function MagicStaffCard({
+  member,
+  index,
+  onSelect,
+}: {
+  member: typeof staff[0];
+  index: number;
+  onSelect?: (name: string) => void;
+}) {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  }
+
+  const roleSlug = member.role.toLowerCase().replace(/\s+/g, "-");
+
+  return (
+    <motion.article
+      className={`magic-staff-card rank-${roleSlug}`}
+      initial={{ opacity: 0, filter: "blur(6px)", y: 12 }}
+      whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.25, delay: Math.min(index * 0.02, 0.3) }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => onSelect?.(member.name)}
+    >
+      {isHovered && (
+        <div
+          className="magic-spotlight"
+          style={{
+            left: `${mousePos.x}px`,
+            top: `${mousePos.y}px`,
+          }}
+        />
+      )}
+      <div className="magic-border-glow" />
+
+      <div className="card-header">
+        <div className={`avatar-pill portrait-${member.tone}`}>
+          <span>{member.initials}</span>
+        </div>
+        <span className={`role-badge role-${roleSlug}`}>{member.role}</span>
+      </div>
+
+      <div className="card-body">
+        <h3 className="staff-name">{member.name}</h3>
+        <span className="staff-handle">@{member.handle}</span>
+      </div>
+
+      <div className="card-footer">
+        <span className="card-index-label">#{index + 1 < 10 ? `0${index + 1}` : index + 1}</span>
+        <span className="card-action-cue">Vote &rarr;</span>
+      </div>
+    </motion.article>
+  );
+}
+
 function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
     <a className="brand" href="#home" aria-label="Vital RP Yearbook home">
@@ -120,6 +187,7 @@ export function YearbookExperience() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>("All");
   const [ballotSubmitted, setBallotSubmitted] = useState(false);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState(initialSuggestions);
@@ -129,10 +197,14 @@ export function YearbookExperience() {
 
   const filteredStaff = useMemo(
     () =>
-      staff.filter((member) =>
-        `${member.name} ${member.handle} ${member.role}`.toLowerCase().includes(query.toLowerCase()),
-      ),
-    [query],
+      staff.filter((member) => {
+        const matchesQuery = `${member.name} ${member.handle} ${member.role}`
+          .toLowerCase()
+          .includes(query.toLowerCase());
+        const matchesRole = selectedRole === "All" || member.role === selectedRole;
+        return matchesQuery && matchesRole;
+      }),
+    [query, selectedRole],
   );
 
   function showNotice(message: string) {
@@ -294,36 +366,48 @@ export function YearbookExperience() {
             </div>
             <p>Every city has a pulse. These are the people who keep ours moving.</p>
           </div>
-          <label className="search-box">
-            <Search size={17} />
-            <span className="sr-only">Search staff</span>
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by character, handle, or role"
-            />
-          </label>
-          <div className="staff-grid">
+          <div className="staff-toolbar">
+            <div className="staff-filter-tabs" role="tablist" aria-label="Filter staff by rank">
+              {roleOptions.map((role) => {
+                const count =
+                  role === "All"
+                    ? staff.length
+                    : staff.filter((m) => m.role === role).length;
+                return (
+                  <button
+                    key={role}
+                    role="tab"
+                    aria-selected={selectedRole === role}
+                    className={`filter-tab ${selectedRole === role ? "active" : ""}`}
+                    onClick={() => setSelectedRole(role)}
+                  >
+                    {role} ({count})
+                  </button>
+                );
+              })}
+            </div>
+            <label className="search-box">
+              <Search size={16} />
+              <span className="sr-only">Search staff</span>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search staff or role..."
+              />
+            </label>
+          </div>
+
+          <div className="staff-grid-compact">
             {filteredStaff.map((member, index) => (
-              <motion.article
-                className={`staff-card portrait-${member.tone}`}
+              <MagicStaffCard
                 key={member.name}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: index * 0.07 }}
-              >
-                <div className="portrait-placeholder">
-                  <span>{member.initials}</span>
-                  <small>Character portrait</small>
-                </div>
-                <div className="card-index">0{index + 1}</div>
-                <div className="staff-card-content">
-                  <p>{member.role}</p>
-                  <h3>{member.name}</h3>
-                  <span>@{member.handle}</span>
-                </div>
-              </motion.article>
+                member={member}
+                index={index}
+                onSelect={(name) => {
+                  setSelectedStaff(name);
+                  showNotice(`Selected ${name} for category voting!`);
+                }}
+              />
             ))}
           </div>
           <div className="portrait-note">
