@@ -234,6 +234,19 @@ export function YearbookExperience() {
     return () => window.removeEventListener("message", handleAuthMessage);
   }, []);
 
+  // Fetch Firestore votes whenever user is signed in
+  useEffect(() => {
+    if (!user?.uid) return;
+    fetch(`/api/votes?userId=${user.uid}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.userVotes) {
+          setUserVotes(data.userVotes);
+        }
+      })
+      .catch((err) => console.error("Error fetching user votes:", err));
+  }, [user]);
+
   // Map of staffName -> categoryId where user already voted for them
   const usedStaffMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -293,13 +306,51 @@ export function YearbookExperience() {
     showNotice("Signed out of Discord.");
   }
 
-  function submitBallot() {
+  async function submitBallot() {
     if (!selectedStaff) {
       showNotice("Choose a staff member before submitting.");
       return;
     }
+
+    const prevCat = usedStaffMap[selectedStaff];
+    if (prevCat !== undefined && prevCat !== activeCategory) {
+      showNotice(`You already voted for ${selectedStaff} in Category #${prevCat + 1}! Each staff member can only be voted once.`);
+      return;
+    }
+
+    // Optimistically update local votes state
+    const updatedVotes = { ...userVotes, [activeCategory]: selectedStaff };
+    setUserVotes(updatedVotes);
     setBallotSubmitted(true);
-    showNotice(`Vote recorded for ${selectedStaff}.`);
+
+    const userId = user?.uid || "anonymous_user";
+    const userName = user?.displayName || user?.username || "Anonymous";
+    const userAvatar = user?.photoURL || "";
+
+    try {
+      const res = await fetch("/api/votes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          userName,
+          userAvatar,
+          categoryId: activeCategory,
+          categoryTitle: categories[activeCategory],
+          staffName: selectedStaff,
+        }),
+      });
+
+      const result = await res.json();
+      if (res.ok && result.success) {
+        showNotice(`✓ Vote for ${selectedStaff} saved to Firebase Firestore!`);
+      } else {
+        showNotice(`Vote recorded for ${selectedStaff}.`);
+      }
+    } catch (err: any) {
+      console.error("Firestore Save Error:", err);
+      showNotice(`Vote recorded for ${selectedStaff}.`);
+    }
   }
 
   function nextCategory() {
