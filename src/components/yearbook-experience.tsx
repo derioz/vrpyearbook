@@ -275,13 +275,22 @@ export function YearbookExperience() {
 
   const filteredNominees = useMemo(
     () =>
-      staff.filter((member) =>
-        `${member.name} ${member.handle} ${member.role}`
+      staff.filter((member) => {
+        // Exclude staff members already voted for in OTHER categories
+        const votedInCat = usedStaffMap[member.name];
+        if (votedInCat !== undefined && votedInCat !== activeCategory) {
+          return false;
+        }
+
+        const matchesQuery = `${member.name} ${member.handle} ${member.role}`
           .toLowerCase()
-          .includes(nomineeQuery.toLowerCase()),
-      ),
-    [nomineeQuery],
+          .includes(nomineeQuery.toLowerCase());
+        return matchesQuery;
+      }),
+    [nomineeQuery, usedStaffMap, activeCategory],
   );
+
+  const isAllDone = completedVotesCount >= categories.length;
 
   function showNotice(message: string) {
     setNotice(message);
@@ -529,79 +538,133 @@ export function YearbookExperience() {
 
             {/* Quick Category Selector Pills */}
             <div className="category-nav-pills" role="tablist" aria-label="Category selector">
-              {categories.map((cat, idx) => (
-                <button
-                  key={idx}
-                  className={`category-pill ${activeCategory === idx ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveCategory(idx);
-                    setSelectedStaff(null);
-                    setBallotSubmitted(false);
-                  }}
-                >
-                  #{idx + 1}
-                </button>
-              ))}
+              {categories.map((cat, idx) => {
+                const isCatVoted = userVotes[idx] !== undefined;
+                return (
+                  <button
+                    key={idx}
+                    className={`category-pill ${activeCategory === idx ? "active" : ""}`}
+                    onClick={() => {
+                      setActiveCategory(idx);
+                      setSelectedStaff(userVotes[idx] || null);
+                      setBallotSubmitted(false);
+                    }}
+                  >
+                    #{idx + 1} {isCatVoted ? "✓" : ""}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="ballot-card">
-            <div className="ballot-card-top">
-              <div>
-                <span>Category {activeCategory + 1} of {categories.length} · Most likely to...</span>
-                <h3>{categories[activeCategory]}</h3>
+          {isAllDone ? (
+            <div className="all-done-container">
+              <div className="all-done-badge">
+                <Check size={36} />
               </div>
-              <Vote size={28} />
-            </div>
-
-            {/* Nominee Filter Box */}
-            <div className="ballot-nominee-search">
-              <Search size={15} style={{ color: "#8b8379" }} />
-              <input
-                value={nomineeQuery}
-                onChange={(e) => setNomineeQuery(e.target.value)}
-                placeholder="Filter nominees by name or role..."
-              />
-              {nomineeQuery && (
+              <h3>All Done! 🎉</h3>
+              <p>
+                You have completed your ballot for all <strong>{completedVotesCount} categories</strong>!
+                All your votes are saved to Firebase Firestore.
+              </p>
+              <div className="all-done-stats">
+                <div>
+                  <strong>{completedVotesCount} / {categories.length}</strong>
+                  <span>Categories Voted</span>
+                </div>
+                <div>
+                  <strong>100%</strong>
+                  <span>Ballot Progress</span>
+                </div>
+              </div>
+              <div style={{ marginTop: 24 }}>
                 <button
-                  style={{ border: 0, background: "none", cursor: "pointer", color: "#8b8379" }}
-                  onClick={() => setNomineeQuery("")}
+                  className="secondary-button"
+                  onClick={() => {
+                    setActiveCategory(0);
+                    setSelectedStaff(userVotes[0] || null);
+                  }}
                 >
-                  <X size={14} />
+                  Review Your Votes
                 </button>
+              </div>
+            </div>
+          ) : (
+            <div className="ballot-card">
+              <div className="ballot-card-top">
+                <div>
+                  <span>Category {activeCategory + 1} of {categories.length} · Most likely to...</span>
+                  <h3>{categories[activeCategory]}</h3>
+                </div>
+                <Vote size={28} />
+              </div>
+
+              {/* Nominee Filter Box */}
+              <div className="ballot-nominee-search">
+                <Search size={15} style={{ color: "#8b8379" }} />
+                <input
+                  value={nomineeQuery}
+                  onChange={(e) => setNomineeQuery(e.target.value)}
+                  placeholder="Filter nominees by name or role..."
+                />
+                {nomineeQuery && (
+                  <button
+                    style={{ border: 0, background: "none", cursor: "pointer", color: "#8b8379" }}
+                    onClick={() => setNomineeQuery("")}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {filteredNominees.length === 0 ? (
+                <div style={{ padding: "32px 16px", textAlign: "center", color: "#8b8379" }}>
+                  <p>All available staff members have been voted on in other categories!</p>
+                </div>
+              ) : (
+                <div className="nominee-list" role="radiogroup" aria-label={categories[activeCategory]}>
+                  {filteredNominees.map((member) => {
+                    const isSelected = selectedStaff === member.name || userVotes[activeCategory] === member.name;
+
+                    return (
+                      <button
+                        key={member.name}
+                        role="radio"
+                        aria-checked={isSelected}
+                        className={isSelected ? "selected" : ""}
+                        onClick={() => {
+                          setSelectedStaff(member.name);
+                          setBallotSubmitted(false);
+                        }}
+                      >
+                        <span className={`nominee-avatar portrait-${member.tone}`}>{member.initials}</span>
+                        <span>
+                          <strong>{member.name}</strong>
+                          <small>{member.role}</small>
+                        </span>
+                        {isSelected && (
+                          <span className="voted-badge">
+                            ✓ {userVotes[activeCategory] === member.name ? "Submitted" : "Selected"}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-            </div>
 
-            <div className="nominee-list" role="radiogroup" aria-label={categories[activeCategory]}>
-              {filteredNominees.map((member) => (
-                <button
-                  key={member.name}
-                  role="radio"
-                  aria-checked={selectedStaff === member.name}
-                  className={selectedStaff === member.name ? "selected" : ""}
-                  onClick={() => {
-                    setSelectedStaff(member.name);
-                    setBallotSubmitted(false);
-                  }}
-                >
-                  <span className={`nominee-avatar portrait-${member.tone}`}>{member.initials}</span>
-                  <span><strong>{member.name}</strong><small>{member.role}</small></span>
-                  <i>{selectedStaff === member.name && <Check size={16} />}</i>
+              <div className="ballot-actions">
+                <button className="primary-button" onClick={submitBallot}>
+                  {ballotSubmitted || userVotes[activeCategory] ? "Vote recorded" : "Submit vote"}
+                  {ballotSubmitted || userVotes[activeCategory] ? <Check size={17} /> : <ArrowRight size={17} />}
                 </button>
-              ))}
-            </div>
-
-            <div className="ballot-actions">
-              <button className="primary-button" onClick={submitBallot}>
-                {ballotSubmitted ? "Vote recorded" : "Submit vote"}
-                {ballotSubmitted ? <Check size={17} /> : <ArrowRight size={17} />}
-              </button>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <button className="next-button" onClick={prevCategory}>&larr; Prev</button>
-                <button className="next-button" onClick={nextCategory}>Next category &rarr;</button>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <button className="next-button" onClick={prevCategory}>&larr; Prev</button>
+                  <button className="next-button" onClick={nextCategory}>Next category &rarr;</button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* SECTION 02: COMPACT MARQUEE STAFF ROSTER */}

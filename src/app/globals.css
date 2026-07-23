@@ -848,5 +848,77 @@ footer p, footer > span { color: #67625c; font-size: 9px; letter-spacing: .1em; 
   border: 1px solid rgba(52, 211, 153, 0.3);
 }
 
+/* All Done Completion Card */
+.all-done-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--card-bg, #1a1917);
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  margin-top: 16px;
+}
+
+.all-done-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 2px solid rgba(52, 211, 153, 0.4);
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+}
+
+.all-done-container h3 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--paper, #fff);
+  margin: 0 0 8px 0;
+}
+
+.all-done-container p {
+  font-size: 14px;
+  color: var(--muted, #8b8379);
+  max-width: 440px;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.all-done-stats {
+  display: flex;
+  gap: 32px;
+  padding: 16px 28px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.all-done-stats div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.all-done-stats strong {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--orange, #ff7a00);
+}
+
+.all-done-stats span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #8b8379);
+  margin-top: 4px;
+}
+
+
 
 
