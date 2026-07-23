@@ -8,18 +8,29 @@ import {
   ChevronRight,
   Clock3,
   Heart,
+  LogOut,
   Menu,
   Plus,
   Search,
   ShieldCheck,
   Sparkles,
   ThumbsUp,
+  User as UserIcon,
   Users,
   Vote,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  auth,
+  loginWithDiscord,
+  logoutUser,
+  saveVoteToFirestore,
+  subscribeToUserVotes,
+  onAuthStateChanged,
+  User,
+} from "@/lib/firebase";
 
 const staff = [
   // Owner

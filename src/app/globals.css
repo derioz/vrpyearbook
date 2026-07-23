@@ -741,4 +741,112 @@ footer p, footer > span { color: #67625c; font-size: 9px; letter-spacing: .1em; 
   border-color: #201d19;
 }
 
+/* Discord Auth & Nominee Double-Vote Lock Styles */
+.discord-button {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(88, 101, 242, 0.4);
+  background: #5865f2;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(88, 101, 242, 0.3);
+  transition: all 0.2s ease;
+}
+
+.discord-button:hover {
+  background: #4752c4;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(88, 101, 242, 0.45);
+}
+
+.user-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px 4px 6px;
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.user-avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--orange);
+}
+
+.user-profile-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.user-profile-info strong {
+  font-size: 11px;
+  color: var(--paper);
+}
+
+.user-profile-info small {
+  font-size: 9px;
+  color: #34d399;
+}
+
+.logout-icon-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  transition: color 0.18s ease;
+}
+.logout-icon-button:hover {
+  color: #ff553a;
+}
+
+/* Disabled Nominee (Already Voted) */
+.nominee-list button.used-elsewhere {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.nominee-list button.used-elsewhere:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.used-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 122, 0, 0.15);
+  color: #d96d00;
+  border: 1px solid rgba(255, 122, 0, 0.3);
+}
+
+.voted-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(52, 211, 153, 0.15);
+  color: #059669;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+
 
