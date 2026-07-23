@@ -1,0 +1,422 @@
+"use client";
+
+import Image from "next/image";
+import {
+  ArrowRight,
+  Award,
+  Check,
+  ChevronRight,
+  Clock3,
+  Heart,
+  Menu,
+  Plus,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  ThumbsUp,
+  Users,
+  Vote,
+  X,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { FormEvent, useMemo, useState } from "react";
+
+const staff = [
+  { name: "Riley Knox", handle: "RileyK", role: "Senior Administrator", initials: "RK", tone: "amber" },
+  { name: "Marcus Vale", handle: "MValentine", role: "Lead Moderator", initials: "MV", tone: "copper" },
+  { name: "Elena Cruz", handle: "ElenaC", role: "Community Manager", initials: "EC", tone: "crimson" },
+  { name: "Noah Mercer", handle: "NMercer", role: "Administrator", initials: "NM", tone: "gold" },
+];
+
+const categories = [
+  "Most likely to start a city-wide chase",
+  "Most likely to become mayor",
+  "Most likely to talk their way out of anything",
+];
+
+const initialSuggestions = [
+  { id: 1, title: "Most likely to survive a zombie outbreak", author: "Anonymous", votes: 42 },
+  { id: 2, title: "Most likely to own half the city", author: "Anonymous", votes: 37 },
+  { id: 3, title: "Most likely to become a local legend", author: "Anonymous", votes: 28 },
+];
+
+function BrandMark({ compact = false }: { compact?: boolean }) {
+  return (
+    <a className="brand" href="#home" aria-label="Vital RP Yearbook home">
+      <Image
+        src="/staffyearbook/vital-rp-logo.png"
+        alt=""
+        width={compact ? 32 : 42}
+        height={compact ? 32 : 42}
+        priority
+      />
+      {!compact && (
+        <span>
+          <strong>Vital RP</strong>
+          <small>Staff Yearbook · 2026</small>
+        </span>
+      )}
+    </a>
+  );
+}
+
+export function YearbookExperience() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(0);
+  const [selectedStaff, setSelectedStaff] = useState<string | null>(null);
+  const [ballotSubmitted, setBallotSubmitted] = useState(false);
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState(initialSuggestions);
+  const [votedSuggestions, setVotedSuggestions] = useState<number[]>([]);
+  const [suggestionText, setSuggestionText] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const filteredStaff = useMemo(
+    () =>
+      staff.filter((member) =>
+        `${member.name} ${member.handle} ${member.role}`.toLowerCase().includes(query.toLowerCase()),
+      ),
+    [query],
+  );
+
+  function showNotice(message: string) {
+    setNotice(message);
+    window.setTimeout(() => setNotice(null), 2800);
+  }
+
+  function submitBallot() {
+    if (!selectedStaff) {
+      showNotice("Choose a staff member before submitting.");
+      return;
+    }
+    setBallotSubmitted(true);
+    showNotice(`Vote recorded for ${selectedStaff}.`);
+  }
+
+  function nextCategory() {
+    setActiveCategory((current) => (current + 1) % categories.length);
+    setSelectedStaff(null);
+    setBallotSubmitted(false);
+  }
+
+  function voteSuggestion(id: number) {
+    setSuggestions((current) =>
+      current.map((suggestion) =>
+        suggestion.id === id
+          ? {
+              ...suggestion,
+              votes: suggestion.votes + (votedSuggestions.includes(id) ? -1 : 1),
+            }
+          : suggestion,
+      ),
+    );
+    setVotedSuggestions((current) =>
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
+    );
+  }
+
+  function submitSuggestion(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const title = suggestionText.trim();
+    if (title.length < 12) {
+      showNotice("Make your suggestion a little more specific.");
+      return;
+    }
+    setSuggestions((current) => [
+      { id: Date.now(), title, author: "You", votes: 1 },
+      ...current,
+    ]);
+    setSuggestionText("");
+    showNotice("Suggestion added to the community board.");
+  }
+
+  return (
+    <div className="site-shell">
+      <div className="noise" aria-hidden="true" />
+      <header className="topbar">
+        <BrandMark />
+        <nav className="desktop-nav" aria-label="Primary navigation">
+          {["Home", "Staff", "Vote", "Suggestions", "Results"].map((item) => (
+            <a key={item} href={`#${item.toLowerCase()}`}>
+              {item}
+            </a>
+          ))}
+        </nav>
+        <button className="access-button" onClick={() => showNotice("Firebase staff access is ready to connect.")}>
+          <ShieldCheck size={16} />
+          Staff access
+        </button>
+        <button
+          className="menu-button"
+          aria-label="Open navigation"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen(true)}
+        >
+          <Menu size={22} />
+        </button>
+      </header>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            className="mobile-menu"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 30 }}
+          >
+            <div className="mobile-menu-head">
+              <BrandMark compact />
+              <button aria-label="Close navigation" onClick={() => setMenuOpen(false)}>
+                <X size={22} />
+              </button>
+            </div>
+            <nav aria-label="Mobile navigation">
+              {["Home", "Staff", "Vote", "Suggestions", "Results"].map((item, index) => (
+                <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setMenuOpen(false)}>
+                  <span>0{index + 1}</span>
+                  {item}
+                </a>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <main>
+        <section className="hero" id="home">
+          <div className="hero-grid" aria-hidden="true" />
+          <div className="hero-glow" aria-hidden="true" />
+          <motion.div
+            className="hero-copy"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65 }}
+          >
+            <div className="kicker"><span>Volume 01</span> The 2026 staff edition</div>
+            <h1>The people <em>behind</em> the city.</h1>
+            <p>
+              A yearbook for the staff who keep Vital RP alive—celebrating the
+              characters, chaos, and stories that made this year unforgettable.
+            </p>
+            <div className="hero-actions">
+              <a className="primary-button" href="#vote">
+                Cast your votes <ArrowRight size={17} />
+              </a>
+              <a className="text-link" href="#staff">
+                Meet the staff <ChevronRight size={16} />
+              </a>
+            </div>
+          </motion.div>
+
+          <motion.aside
+            className="ballot-status"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.65, delay: 0.15 }}
+          >
+            <div className="live-label"><span /> Voting is live</div>
+            <strong>6</strong>
+            <p>days remaining</p>
+            <div className="status-rule"><span /></div>
+            <dl>
+              <div><dt>Categories</dt><dd>12</dd></div>
+              <div><dt>Your progress</dt><dd>4 / 12</dd></div>
+            </dl>
+          </motion.aside>
+
+          <div className="hero-index" aria-hidden="true">
+            <span>VRP</span><strong>YB</strong><span>26</span>
+          </div>
+          <a className="scroll-cue" href="#staff">Scroll to explore <span>↓</span></a>
+        </section>
+
+        <section className="staff-section section" id="staff">
+          <div className="section-heading">
+            <div>
+              <span className="section-number">01 / The roster</span>
+              <h2>Meet the staff</h2>
+            </div>
+            <p>Every city has a pulse. These are the people who keep ours moving.</p>
+          </div>
+          <label className="search-box">
+            <Search size={17} />
+            <span className="sr-only">Search staff</span>
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search by character, handle, or role"
+            />
+          </label>
+          <div className="staff-grid">
+            {filteredStaff.map((member, index) => (
+              <motion.article
+                className={`staff-card portrait-${member.tone}`}
+                key={member.name}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ delay: index * 0.07 }}
+              >
+                <div className="portrait-placeholder">
+                  <span>{member.initials}</span>
+                  <small>Character portrait</small>
+                </div>
+                <div className="card-index">0{index + 1}</div>
+                <div className="staff-card-content">
+                  <p>{member.role}</p>
+                  <h3>{member.name}</h3>
+                  <span>@{member.handle}</span>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+          <div className="portrait-note">
+            <Sparkles size={16} />
+            Character portraits will be delivered from FiveManage.
+          </div>
+        </section>
+
+        <section className="vote-section section" id="vote">
+          <div className="vote-intro">
+            <span className="section-number">02 / The ballot</span>
+            <h2>Your call.<br /><em>Their legacy.</em></h2>
+            <p>Pick the staff member who fits the category best. Your ballot stays private.</p>
+            <div className="category-progress">
+              <span>Category {activeCategory + 1} of {categories.length}</span>
+              <div><i style={{ width: `${((activeCategory + 1) / categories.length) * 100}%` }} /></div>
+            </div>
+          </div>
+          <div className="ballot-card">
+            <div className="ballot-card-top">
+              <div>
+                <span>Most likely to...</span>
+                <h3>{categories[activeCategory]}</h3>
+              </div>
+              <Vote size={28} />
+            </div>
+            <div className="nominee-list" role="radiogroup" aria-label={categories[activeCategory]}>
+              {staff.map((member) => (
+                <button
+                  key={member.name}
+                  role="radio"
+                  aria-checked={selectedStaff === member.name}
+                  className={selectedStaff === member.name ? "selected" : ""}
+                  onClick={() => {
+                    setSelectedStaff(member.name);
+                    setBallotSubmitted(false);
+                  }}
+                >
+                  <span className={`nominee-avatar portrait-${member.tone}`}>{member.initials}</span>
+                  <span><strong>{member.name}</strong><small>{member.role}</small></span>
+                  <i>{selectedStaff === member.name && <Check size={16} />}</i>
+                </button>
+              ))}
+            </div>
+            <div className="ballot-actions">
+              <button className="primary-button" onClick={submitBallot}>
+                {ballotSubmitted ? "Vote recorded" : "Submit vote"}
+                {ballotSubmitted ? <Check size={17} /> : <ArrowRight size={17} />}
+              </button>
+              <button className="next-button" onClick={nextCategory}>Next category</button>
+            </div>
+          </div>
+        </section>
+
+        <section className="suggestions-section section" id="suggestions">
+          <div className="section-heading">
+            <div>
+              <span className="section-number">03 / Community picks</span>
+              <h2>Suggest the next category</h2>
+            </div>
+            <p>The best categories come from the people who know the city.</p>
+          </div>
+          <div className="suggestion-layout">
+            <form className="suggestion-form" onSubmit={submitSuggestion}>
+              <span className="form-icon"><Plus size={20} /></span>
+              <label htmlFor="suggestion">Finish the sentence</label>
+              <div className="suggestion-input">
+                <span>Most likely to</span>
+                <textarea
+                  id="suggestion"
+                  value={suggestionText}
+                  onChange={(event) => setSuggestionText(event.target.value)}
+                  placeholder="turn a traffic stop into a city-wide incident..."
+                  maxLength={120}
+                />
+              </div>
+              <div className="form-footer">
+                <span>{suggestionText.length} / 120</span>
+                <button className="primary-button" type="submit">Submit idea <ArrowRight size={16} /></button>
+              </div>
+            </form>
+            <div className="suggestion-board">
+              <div className="board-header">
+                <span>Trending suggestions</span>
+                <small>Vote for your favorites</small>
+              </div>
+              {suggestions.slice(0, 4).map((suggestion, index) => {
+                const voted = votedSuggestions.includes(suggestion.id);
+                return (
+                  <article className="suggestion-row" key={suggestion.id}>
+                    <span className="suggestion-rank">0{index + 1}</span>
+                    <div><h3>{suggestion.title}</h3><p>Submitted by {suggestion.author}</p></div>
+                    <button
+                      className={voted ? "voted" : ""}
+                      aria-label={`${voted ? "Remove vote from" : "Vote for"} ${suggestion.title}`}
+                      onClick={() => voteSuggestion(suggestion.id)}
+                    >
+                      <ThumbsUp size={15} /> {suggestion.votes}
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="results-section section" id="results">
+          <div className="results-glow" aria-hidden="true" />
+          <div className="results-copy">
+            <span className="section-number">04 / Results preview</span>
+            <h2>Legends in<br />the making.</h2>
+            <p>Results unlock after the final ballot closes. Until then, every vote stays under wraps.</p>
+            <div className="results-meta">
+              <span><Clock3 size={16} /> Reveal night · August 01</span>
+              <span><Users size={16} /> Staff-only results</span>
+            </div>
+          </div>
+          <div className="winner-stack" aria-label="Results hidden until reveal night">
+            <article className="winner-card card-back"><Award size={28} /></article>
+            <article className="winner-card card-middle"><Heart size={28} /></article>
+            <article className="winner-card card-front">
+              <div className="winner-lock"><ShieldCheck size={22} /></div>
+              <span>Winner sealed</span>
+              <h3>Most likely to<br />become mayor</h3>
+              <p>Reveal night · 08.01.26</p>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <BrandMark />
+        <p>Built for the people behind Vital RP.</p>
+        <span>© 2026 Vital Roleplay</span>
+      </footer>
+
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            className="toast"
+            role="status"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+          >
+            <Check size={16} /> {notice}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
