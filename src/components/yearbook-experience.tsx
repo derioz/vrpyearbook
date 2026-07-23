@@ -68,9 +68,26 @@ const staff = [
 ];
 
 const categories = [
-  "Most likely to start a city-wide chase",
-  "Most likely to become mayor",
-  "Most likely to talk their way out of anything",
+  "Start a city-wide chase over a 50mph speeding ticket",
+  "Answer a staff support ticket in under 2 seconds",
+  "Spend 6 straight hours muted in Discord VC without leaving",
+  "Talk their way out of a guaranteed max prison sentence",
+  "Have a crisp $500 studio microphone but play on 20 FPS",
+  "Accidentally blow up their own vehicle at the gas station",
+  "Write a 50-page character backstory nobody asked for",
+  "Get lost in Los Santos even with the GPS map wide open",
+  "Own 15 custom import cars and drive the exact same one every day",
+  "Become Mayor of Vital RP and get impeached within 48 hours",
+  "Pull off the cleanest getaway driver maneuver in server history",
+  "Tab out to scroll TikTok during a serious staff meeting",
+  "Give out free life advice/therapy in the middle of MRPD",
+  "Accidentally leave their mic on open-mic while eating crunchy snacks",
+  "Win a heated debate by quoting the FiveM server rules word-for-word",
+  "Survive a full city economy wipe with a hidden fortune",
+  "Organize a 20-car convoy that ends in immediate pile-up chaos",
+  "Stay up playing Vital RP until 7 AM on a work/school night",
+  "Be voted 'Staff Member of the Year' by popular demand",
+  "Create an IC crisis out of a simple miscommunication",
 ];
 
 const initialSuggestions = [
@@ -258,8 +275,8 @@ export function YearbookExperience() {
             <p>days remaining</p>
             <div className="status-rule"><span /></div>
             <dl>
-              <div><dt>Categories</dt><dd>12</dd></div>
-              <div><dt>Your progress</dt><dd>4 / 12</dd></div>
+              <div><dt>Categories</dt><dd>{categories.length}</dd></div>
+              <div><dt>Your progress</dt><dd>{activeCategory + 1} / {categories.length}</dd></div>
             </dl>
           </motion.aside>
 
