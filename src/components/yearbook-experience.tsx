@@ -207,24 +207,31 @@ export function YearbookExperience() {
   const [suggestionText, setSuggestionText] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
 
-  // Firebase Auth state & Firestore user votes
-  const [user, setUser] = useState<User | null>(null);
+  // Discord Auth state & Firestore user votes
+  const [user, setUser] = useState<any>(null);
   const [userVotes, setUserVotes] = useState<Record<number, string>>({});
 
   useEffect(() => {
-    if (!auth) return;
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const unsubVotes = subscribeToUserVotes(currentUser.uid, (votes) => {
-          setUserVotes(votes);
-        });
-        return () => unsubVotes();
-      } else {
-        setUserVotes({});
+    // Check saved session in localStorage
+    const savedUser = localStorage.getItem("vrp_discord_user");
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed);
+      } catch (e) {}
+    }
+
+    // Listen for popup message from Discord OAuth callback
+    function handleAuthMessage(event: MessageEvent) {
+      if (event.data && event.data.type === "DISCORD_AUTH_SUCCESS" && event.data.user) {
+        setUser(event.data.user);
+        localStorage.setItem("vrp_discord_user", JSON.stringify(event.data.user));
+        showNotice(`Welcome, @${event.data.user.username}! Signed in with Discord.`);
       }
-    });
-    return () => unsubscribe();
+    }
+
+    window.addEventListener("message", handleAuthMessage);
+    return () => window.removeEventListener("message", handleAuthMessage);
   }, []);
 
   // Map of staffName -> categoryId where user already voted for them
@@ -268,20 +275,22 @@ export function YearbookExperience() {
     window.setTimeout(() => setNotice(null), 3500);
   }
 
-  async function handleDiscordLogin() {
-    try {
-      if (!isFirebaseConfigured) {
-        showNotice("Firebase API Keys missing. Follow step-by-step setup guide to connect Discord Auth.");
-        return;
-      }
-      const loggedInUser = await loginWithDiscord();
-      if (loggedInUser) {
-        showNotice(`Welcome, ${loggedInUser.displayName || "Discord User"}! Signed in successfully.`);
-      }
-    } catch (err: any) {
-      console.error("Discord Auth Error:", err);
-      showNotice(err.message || "Failed to sign in with Discord.");
-    }
+  function handleDiscordLogin() {
+    const width = 500;
+    const height = 750;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    window.open(
+      "/api/auth/discord/login",
+      "DiscordAuthWindow",
+      `width=${width},height=${height},top=${top},left=${left}`,
+    );
+  }
+
+  function handleLogout() {
+    setUser(null);
+    localStorage.removeItem("vrp_discord_user");
+    showNotice("Signed out of Discord.");
   }
 
   function submitBallot() {
@@ -359,7 +368,7 @@ export function YearbookExperience() {
               <strong>{user.displayName || "Discord User"}</strong>
               <small>Connected</small>
             </div>
-            <button className="logout-icon-button" title="Sign out" onClick={() => logoutUser()}>
+            <button className="logout-icon-button" title="Sign out" onClick={handleLogout}>
               <LogOut size={15} />
             </button>
           </div>
