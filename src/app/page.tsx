@@ -1,5 +1,5 @@
-import { permanentRedirect } from "next/navigation";
+import { YearbookExperience } from "@/components/yearbook-experience";
 
 export default function Home() {
-  permanentRedirect("/staffyearbook");
+  return <YearbookExperience />;
 }
